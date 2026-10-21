@@ -4,7 +4,7 @@ import App from './AppView.vue'
 import api from '../api/api-component-mock.cjs'
 const AppComponent = App.default || App
 
-const { getCourse, getCourses, getCurrentUser, logIn, kakaoLogin, createPaymentOrder, confirmPayment } = api
+const { getCourse, getCourses, getCurrentUser, logIn, logout, kakaoLogin, createPaymentOrder, confirmPayment } = api
 
 const catalog = [
   { id: 1, title: 'FastAPI', summary: '빠르게 API를 만들어요', category: '백엔드', thumbnail_url: null, instructor_name: '강사', price_krw: 79000, level: '초급', duration_minutes: 120 },
@@ -145,6 +145,26 @@ test('restores the authenticated session before allowing a course purchase', asy
   expect(window.location.pathname).toBe('/courses/1')
   expect(wrapper.text()).toContain('강의 구매가 완료됐어요.')
   delete window.PortOne
+})
+
+test('logs out through the backend and clears the authenticated header', async () => {
+  window.history.replaceState({}, '', '/')
+  getCurrentUser.mockResolvedValue({ name: '모아' })
+  getCourses.mockResolvedValue(catalog)
+  logout.mockResolvedValue(null)
+
+  const wrapper = mount(AppComponent)
+  await flushPromises()
+  expect(wrapper.text()).toContain('로그아웃')
+
+  const logoutButton = wrapper.findAll('button').find((button) => button.text() === '로그아웃')
+  await logoutButton.trigger('click')
+  await flushPromises()
+
+  expect(logout).toHaveBeenCalled()
+  expect(window.location.pathname).toBe('/')
+  expect(wrapper.text()).not.toContain('로그아웃')
+  expect(wrapper.text()).toContain('로그인')
 })
 
 test('preserves the Kakao authorization code and completes login from its callback', async () => {

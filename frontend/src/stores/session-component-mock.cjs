@@ -1,11 +1,15 @@
 const { ref } = require('vue')
 
 module.exports = {
-  createSessionStore: () => ({
-    user: ref(null),
-    busy: ref(false),
-    error: ref(''),
-    message: ref(''),
-    paymentBusy: ref(false),
-  }),
+  createSessionStore: () => {
+    const user = ref(null)
+    return {
+      user,
+      busy: ref(false),
+      error: ref(''),
+      message: ref(''),
+      paymentBusy: ref(false),
+      clearSession: () => { user.value = null },
+    }
+  },
 }

@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Vite는 `/board`, `/user`, `/courses`, `/payments` 요청을 `http://127.0.0.1:8000`으로 전달합니다. API 응답의 `{ code, message, result }` 봉투를 처리하고 로그인 쿠키를 위해 요청에 `credentials: include`를 사용합니다. 기본 API 주소는 상대 경로라 쿠키가 프론트엔드 호스트에 저장되고 새로고침 뒤에도 세션을 복구할 수 있습니다. 다른 환경에서는 `VITE_API_BASE_URL`로 API 주소를 지정할 수 있습니다.
+백엔드 기본 주소는 `VITE_API_BASE_URL` 한 곳에서 관리합니다. 운영 빌드는 `.env.production`의 `https://api.hhon.kro.kr`을 사용하고, `npm run build`에서 이 값이 번들에 반영됩니다. 개발 중에는 같은 환경 변수를 Vite 프록시가 사용하며, 값이 없으면 로컬 백엔드 `http://127.0.0.1:8000`을 사용합니다. API 응답의 `{ code, message, result }` 봉투를 처리하고 로그인 쿠키를 위해 요청에 `credentials: include`를 사용합니다.
 
 ## 소스 구조
 

@@ -1,4 +1,4 @@
-import { createBoard, getBoards, getCourse, getCourses, getCurrentUser, kakaoLogin, createPaymentOrder, confirmPayment } from './index.js'
+import { createBoard, getBoards, getCourse, getCourses, getCurrentUser, kakaoLogin, logout, createPaymentOrder, confirmPayment } from './index.js'
 import { jest } from '@jest/globals'
 
 const originalFetch = global.fetch
@@ -35,6 +35,15 @@ describe('API envelope handling', () => {
     global.fetch.mockResolvedValue({ ok: true, json: async () => ({ code: 200, message: 'success', result: { name: '모아' } }) })
     await expect(getCurrentUser()).resolves.toEqual({ name: '모아' })
     expect(fetch).toHaveBeenCalledWith('/user/me', expect.objectContaining({ credentials: 'include' }))
+  })
+
+  it('clears the server session through the logout endpoint', async () => {
+    global.fetch.mockResolvedValue({ ok: true, json: async () => ({ code: 200, result: null }) })
+    await expect(logout()).resolves.toBeNull()
+    expect(fetch).toHaveBeenCalledWith('/user/logout', expect.objectContaining({
+      method: 'POST',
+      credentials: 'include',
+    }))
   })
 
   it('getCourses requests the public catalog', async () => {

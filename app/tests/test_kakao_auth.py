@@ -7,6 +7,7 @@ from sqlalchemy.pool import StaticPool
 
 from db.database import Base, get_db
 from core.security import createToken
+from core.config import settings
 from main import app
 from models.user import KakaoAccount
 
@@ -23,6 +24,7 @@ def client(monkeypatch):
     from core.config import settings
 
     monkeypatch.setitem(settings.__dict__, "KAKAO_REST_API_KEY", "test-rest-key")
+    monkeypatch.setitem(settings.__dict__, "AUTH_COOKIE_DOMAIN", None)
     monkeypatch.setitem(
         settings.__dict__,
         "KAKAO_REDIRECT_URI",
@@ -126,6 +128,24 @@ def test_current_session_requires_a_valid_auth_cookie(client):
 
     assert response.status_code == 401
     assert response.json()["message"] == "로그인이 필요합니다."
+
+
+def test_logout_expires_shared_auth_cookie(client, monkeypatch):
+    monkeypatch.setattr(settings, "AUTH_COOKIE_DOMAIN", "hhon.kro.kr")
+    client.cookies.set("EN_AT", "existing-token", domain="hhon.kro.kr", path="/")
+
+    response = client.post("/user/logout")
+
+    assert response.status_code == 200
+    assert response.json()["result"] == {"message": "로그아웃되었습니다."}
+    set_cookie = response.headers["set-cookie"]
+    assert "EN_AT=\"\"" in set_cookie
+    assert "Domain=hhon.kro.kr" in set_cookie
+    assert "Path=/" in set_cookie
+    assert "Max-Age=0" in set_cookie
+    assert "HttpOnly" in set_cookie
+    assert "Secure" in set_cookie
+    assert "SameSite=lax" in set_cookie
 
 
 def test_kakao_login_rejects_code_when_kakao_token_exchange_fails(client, monkeypatch):

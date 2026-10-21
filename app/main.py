@@ -19,7 +19,11 @@ app = FastAPI(title="노트 API", version="0.1.0")
 # because the API authenticates users with the EN_AT cookie.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://www.hhon.kro.kr",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

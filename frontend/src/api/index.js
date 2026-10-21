@@ -1,4 +1,6 @@
-const apiBaseUrl = (import.meta.env?.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+// Keep all backend requests on this shared base URL. In development, use the
+// Vite proxy; production builds use the URL from frontend/.env.production.
+const apiBaseUrl = (import.meta.env?.DEV ? '' : import.meta.env?.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
 async function request(path, options = {}) {
   let response
@@ -25,6 +27,7 @@ export const signUp = (data) => request('/user/signup', { method: 'POST', body: 
 export const logIn = (data) => request('/user/login', { method: 'POST', body: JSON.stringify(data) })
 export const kakaoLogin = (code) => request('/user/kakao-login', { method: 'POST', body: JSON.stringify({ code }) })
 export const getCurrentUser = () => request('/user/me')
+export const logout = () => request('/user/logout', { method: 'POST' })
 export const getCourses = () => request('/courses')
 export const getCourse = (id) => request(`/courses/${id}`)
 export const createPaymentOrder = (courseId) => request('/payments/orders', { method: 'POST', body: JSON.stringify({ course_id: courseId }) })

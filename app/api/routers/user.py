@@ -14,6 +14,30 @@ from schemas.user import KakaoLoginReq, KakaoLoginRes, LoginReq, LoginRes, Sessi
 router = APIRouter(prefix="/user", tags=["user"])
 
 
+def _set_auth_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        "EN_AT",
+        token,
+        domain=settings.AUTH_COOKIE_DOMAIN,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
+
+
+def _clear_auth_cookie(response: Response) -> None:
+    """Expire the shared authentication cookie on every hhon.kro.kr subdomain."""
+    response.delete_cookie(
+        "EN_AT",
+        domain=settings.AUTH_COOKIE_DOMAIN,
+        path="/",
+        secure=True,
+        httponly=True,
+        samesite="lax",
+    )
+
+
 @router.get("/me", response_model=SessionRes)
 def current_session(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("EN_AT")
@@ -93,13 +117,7 @@ def kakao_login(req: KakaoLoginReq, res: Response, db: Session = Depends(get_db)
         account.nickname = nickname
     db.commit()
 
-    res.set_cookie(
-        "EN_AT",
-        createToken(f"kakao:{kakao_id}"),
-        httponly=True,
-        secure=False,
-        samesite="lax",
-    )
+    _set_auth_cookie(res, createToken(f"kakao:{kakao_id}"))
     return {"nickname": nickname}
 
 @router.post("/login",response_model=LoginRes)
@@ -112,13 +130,15 @@ def login(req: LoginReq, res:Response):
         "name" : "user01",
         "profile" : "배고파요"
     }
-    res.set_cookie("EN_AT",
-                        createToken(req.email),
-                        httponly=True,
-                        secure=False,
-                        samesite="lax"
-                        )
+    _set_auth_cookie(res, createToken(req.email))
     return user
+
+
+@router.post("/logout")
+def logout(res: Response):
+    """Log out by expiring the authentication cookie in the shared domain."""
+    _clear_auth_cookie(res)
+    return {"message": "로그아웃되었습니다."}
 
 #제어의 역전: IoC, 객체 생성이나 프로그램의 실행 흐름의 제어를 외부로 넘기는 프로그래밍 방식
 #의존성 주입 :DI, 필요한 객체를 우리가 직접 생성하지 않고 외부에서 전달해주는 방식(depends)

@@ -1,6 +1,6 @@
 <script>
 import {computed, onMounted, onUnmounted, reactive, ref, watch} from 'vue'
-import {getCourse, getCourses, getCurrentUser, kakaoLogin, logIn, signUp, createPaymentOrder, confirmPayment} from '../api'
+import {getCourse, getCourses, getCurrentUser, kakaoLogin, logIn, logout, signUp, createPaymentOrder, confirmPayment} from '../api'
 import {authorizeKakao} from '../api/kakao'
 import {resolveRoute} from '../router/index.js'
 import {createSessionStore} from '../stores/session.js'
@@ -9,7 +9,7 @@ export default {
   setup() {
     const route = ref(resolveRoute()), courses = ref([]), selected = ref(null), loading = ref(false), kakaoBusy = ref(false),
         search = ref(''), activeCategory = ref('전체')
-    const {user, busy, error, message, paymentBusy} = createSessionStore()
+    const {user, busy, error, message, paymentBusy, clearSession} = createSessionStore()
     const account = reactive({email: '', password: '', name: ''})
 
     const routeName = computed(() => route.value?.name || 'list');
@@ -121,6 +121,20 @@ export default {
       }
     }
 
+    async function logoutUser() {
+      error.value = ''
+      try {
+        await logout()
+      } catch (e) {
+        // The local session is cleared even when the server is unavailable.
+        // This prevents the UI from retaining an authenticated state.
+        error.value = e.message
+      } finally {
+        clearSession()
+        go('/')
+      }
+    }
+
     async function purchaseCourse() {
       if (!user.value) {
         try {
@@ -217,6 +231,7 @@ export default {
       retry,
       loginWithKakao,
       submitAccount,
+      logoutUser,
       purchaseCourse
     }
   }
@@ -230,7 +245,7 @@ export default {
       <nav>
         <button @click="go('/')">강의 둘러보기</button>
       </nav>
-      <div class="top-actions"><span v-if="user">{{ user.name }}</span>
+      <div class="top-actions"><template v-if="user"><span>{{ user.name }}</span><button @click="logoutUser">로그아웃</button></template>
         <template v-else>
           <button @click="go('/login')">로그인</button>
           <button class="join-button" @click="go('/signup')">회원가입</button>

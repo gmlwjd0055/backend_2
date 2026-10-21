@@ -9,10 +9,10 @@ describe('Kakao JavaScript SDK authorization', () => {
       Auth: { authorize: jest.fn() },
     }
 
-    authorizeKakao(sdk, 'javascript-key', 'http://localhost:5173/login/kakao/callback', 'csrf-state')
+    authorizeKakao(sdk, 'javascript-key', 'http://www.hhon.kro.kr/login/kakao/callback', 'csrf-state')
 
     expect(sdk.Auth.authorize).toHaveBeenCalledWith({
-      redirectUri: 'http://localhost:5173/login/kakao/callback',
+      redirectUri: 'http://www.hhon.kro.kr/login/kakao/callback',
       scope: 'profile_nickname',
       state: 'csrf-state',
     })
@@ -25,7 +25,7 @@ describe('Kakao JavaScript SDK authorization', () => {
       Auth: { authorize: jest.fn() },
     }
 
-    authorizeKakao(sdk, 'javascript-key', 'http://localhost:5173/login/kakao/callback', 'csrf-state')
+    authorizeKakao(sdk, 'javascript-key', 'http://www.hhon.kro.kr/login/kakao/callback', 'csrf-state')
 
     expect(sdk.init).toHaveBeenCalledWith('javascript-key')
     expect(sdk.Auth.authorize).toHaveBeenCalled()

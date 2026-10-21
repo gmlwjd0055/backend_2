@@ -5,6 +5,7 @@ module.exports = {
   confirmPayment: jest.fn(),
   kakaoLogin: jest.fn(),
   getCurrentUser: jest.fn(),
+  logout: jest.fn(),
   logIn: jest.fn(),
   signUp: jest.fn(),
 }
