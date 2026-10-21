@@ -19,3 +19,15 @@ class LoginReq(BaseModel):
 
 class LoginRes(BaseModel):
     email: str
+
+
+class KakaoLoginReq(BaseModel):
+    code: str
+
+
+class KakaoLoginRes(BaseModel):
+    nickname: str
+
+
+class SessionRes(BaseModel):
+    name: str

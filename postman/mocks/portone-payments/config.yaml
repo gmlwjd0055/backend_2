@@ -1,0 +1,10 @@
+version: 1
+id: 33e7249c-74fe-4238-b487-65eaf8d61424
+name: PortOne Payment Query Test Contract
+slug: portone-payment-query-test-contr
+protocol: http
+port: 4505
+scenarios:
+  - name: default
+    path: ./default.js
+    default: true

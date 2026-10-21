@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: PortOne Payment Query Test Contract
+  version: 1.0.0
+  description: Minimal upstream contract excerpt used to simulate payment lookup during local integration checks.
+servers:
+  - url: https://api.portone.io
+paths:
+  /payments/{paymentId}:
+    get:
+      operationId: getPayment
+      summary: Query a payment by its PortOne payment ID
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment was found
+          content:
+            application/json:
+              examples:
+                paid:
+                  value:
+                    id: course-1-postman-simulation
+                    status: PAID
+                    currency: KRW
+                    amount:
+                      total: 79000

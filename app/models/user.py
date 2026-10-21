@@ -1,5 +1,6 @@
 #DB의 표와 1:1로 매핑되는 파일
 
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 from db.database import Base
 
@@ -10,3 +11,11 @@ class User(Base):
     email: Mapped[str] = mapped_column()
     password: Mapped[str] = mapped_column()
     name: Mapped[str] = mapped_column()
+
+
+class KakaoAccount(Base):
+    __tablename__ = "kakao_account"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kakao_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    nickname: Mapped[str] = mapped_column(String(255))

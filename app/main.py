@@ -5,11 +5,25 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from api.routers import user, board #다른 py코드 불러오기, main만 실행해주면 됨
-from db.database import Base,engine
-from models.user import User
+from fastapi.middleware.cors import CORSMiddleware
+from api.routers import user, board, courses, payments #다른 py코드 불러오기, main만 실행해주면 됨
+from db.database import Base, engine, SessionLocal
+from models.user import User, KakaoAccount
 from models.board import Board
+from models.course import Course
+from models.payment import PaymentOrder
+from db.seed import seed_demo_courses
 app = FastAPI(title="노트 API", version="0.1.0")
+
+# The Vue dev server can be opened with either hostname. Credentials are needed
+# because the API authenticates users with the EN_AT cookie.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.middleware("http")
@@ -20,6 +34,10 @@ async def response_envelope(request: Request, call_next):
     if request.url.path in {"/docs", "/docs/oauth2-redirect", "/redoc", "/openapi.json"}:
         return response
     if "application/json" not in response.headers.get("content-type", ""):
+        return response
+    # HTTP and validation exception handlers already return the standard envelope.
+    # Returning their streamed response after reading it here would consume its body.
+    if response.status_code >= 400:
         return response
 
     body = getattr(response, "body", None)
@@ -81,7 +99,11 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 app.include_router(user.router)
 app.include_router(board.router)
+app.include_router(courses.router)
+app.include_router(payments.router)
 Base.metadata.create_all(bind = engine)
+with SessionLocal() as db:
+    seed_demo_courses(db)
 @app.get("/")
 def main():
     return {"message": "메인 페이지입니다."}
